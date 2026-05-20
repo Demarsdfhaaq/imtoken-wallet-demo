@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 钱包助手 - imToken 十周年共创</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin: 0 0 10px 0;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .info {
+            background: #e7f3ff;
+            border: 1px solid #2196F3;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #0d47a1;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5a6fd6;
+        }
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-success:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .hidden { display: none; }
+        .mnemonic-box {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .mnemonic-blur {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            user-select: none;
+        }
+        .address-box {
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        .eth-address {
+            background: #f0f7ff;
+            color: #0066cc;
+        }
+        .btc-address {
+            background: #fff8f0;
+            color: #cc7700;
+        }
+        .signature-box {
+            padding: 12px;
+            background: #f0fff0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: monospace;
+            word-break: break-all;
+            color: #228b22;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #721c24;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            margin-top: 30px;
+        }
+        .toggle-btn {
+            font-size: 12px;
+            color: #667eea;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🦊 AI 钱包助手</h1>
+            <p>imToken 十周年共创作品 | 基于 Token Core</p>
+        </div>
+
+        <!-- 演示模式提示 -->
+        <div class="info">
+            ℹ️ <strong>演示模式：</strong>当前使用模拟数据展示界面。本 Demo 基于 Token Core 的 tcx-wasm 构建。
+        </div>
+
+        <!-- 安全提示 -->
+        <div class="warning">
+            <strong>⚠️ 安全提示：</strong>
+            <ul style="margin: 8px 0 0 0; padding-left: 18px;">
+                <li>本 Demo 仅用于展示 Token Core 功能</li>
+                <li>请使用测试助记词，不要使用真实钱包</li>
+                <li>不要在公共环境输入真实私钥</li>
+            </ul>
+        </div>
+
+        <!-- 创建钱包 -->
+        <div class="card">
+            <h2>🔐 创建钱包</h2>
+            <div class="form-group">
+                <label>设置密码（可选，默认使用演示密码）</label>
+                <input type="password" id="password" placeholder="输入密码">
+            </div>
+            <button class="btn btn-primary" id="createBtn" onclick="createWallet()">✨ 创建新钱包</button>
+        </div>
+
+        <!-- 钱包信息 -->
+        <div class="card hidden" id="walletInfo">
+            <h2>📋 钱包信息</h2>
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label>助记词</label>
+                    <button class="toggle-btn" onclick="toggleMnemonic()" id="toggleBtn">👁️ 显示</button>
+                </div>
+                <div class="mnemonic-box mnemonic-blur" id="mnemonicBox">
+                    abandon ability able about above absent absorb abstract absurd abuse access accident
+                </div>
+            </div>
+            <div class="form-group">
+                <label>ETH 地址</label>
+                <div class="address-box eth-address" id="ethAddress">0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb</div>
+            </div>
+            <div class="form-group">
+                <label>BTC 地址</label>
+                <div class="address-box btc-address" id="btcAddress">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</div>
+            </div>
+        </div>
+
+        <!-- 消息签名 -->
+        <div class="card hidden" id="signSection">
+            <h2>✍️ 消息签名</h2>
+            <div class="form-group">
+                <label>输入消息</label>
+                <textarea id="message" rows="3" placeholder="输入要签名的消息..."></textarea>
+            </div>
+            <button class="btn btn-success" id="signBtn" onclick="signMessage()">✍️ 签名消息</button>
+            <div class="form-group hidden" id="signatureResult">
+                <label style="margin-top: 16px;">签名结果</label>
+                <div class="signature-box" id="signatureBox"></div>
+            </div>
+        </div>
+
+        <!-- 错误提示 -->
+        <div class="error hidden" id="errorBox"></div>
+
+        <!-- 底部 -->
+        <div class="footer">
+            <p>基于 Token Core (tcx-wasm) 构建</p>
+            <p>imToken 十周年 AI 共创活动作品</p>
+        </div>
+    </div>
+
+    <script>
+        let walletCreated = false;
+        let mnemonicVisible = false;
+
+        function createWallet() {
+            const btn = document.getElementById('createBtn');
+            const password = document.getElementById('password').value;
+            
+            btn.disabled = true;
+            btn.textContent = '创建中...';
+            
+            // 模拟延迟
+            setTimeout(() => {
+                // 显示钱包信息
+                document.getElementById('walletInfo').classList.remove('hidden');
+                document.getElementById('signSection').classList.remove('hidden');
+                
+                btn.textContent = '✅ 钱包已创建';
+                walletCreated = true;
+                
+                // 滚动到钱包信息
+                document.getElementById('walletInfo').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+
+        function toggleMnemonic() {
+            const box = document.getElementById('mnemonicBox');
+            const btn = document.getElementById('toggleBtn');
+            
+            mnemonicVisible = !mnemonicVisible;
+            
+            if (mnemonicVisible) {
+                box.classList.remove('mnemonic-blur');
+                btn.textContent = '🙈 隐藏';
+            } else {
+                box.classList.add('mnemonic-blur');
+                btn.textContent = '👁️ 显示';
+            }
+        }
+
+        function signMessage() {
+            const btn = document.getElementById('signBtn');
+            const message = document.getElementById('message').value;
+            
+            if (!message) {
+                showError('请输入要签名的消息');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = '签名中...';
+            hideError();
+            
+            // 模拟签名延迟
+            setTimeout(() => {
+                const signature = '0x' + Array(130).fill(0).map(() => 
+                    '0123456789abcdef'[Math.floor(Math.random() * 16)]
+                ).join('') + '1b';
+                
+                document.getElementById('signatureBox').textContent = signature;
+                document.getElementById('signatureResult').classList.remove('hidden');
+                
+                btn.textContent = '✍️ 签名消息';
+                btn.disabled = false;
+            }, 500);
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = '❌ ' + msg;
+            box.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
